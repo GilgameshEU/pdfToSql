@@ -16,20 +16,11 @@ db_config = {
 conn_str = ';'.join([f"{key}={value}" for key, value in db_config.items()])
 engine = create_engine(f"mssql+pyodbc:///?odbc_connect={conn_str}")
 
-
 df_list = tabula.read_pdf('test_pdf/test.pdf', pages='all',stream=True)
 print(f"Успешно извлечено таблиц-{len(df_list)}")
 
-
-# # Получение индекса конца первого датафрейма
-# if len(df_list) > 0:
-#     end_index = df_list[0].shape[0]
-# else:
-#     end_index = 0
-
 # Объединение всех датафреймов из списка в один датафрейм
 df = pd.concat(df_list, ignore_index=True)
-
 
 # Заполнение всех пропущенных значений в первом столбце нулями
 df.iloc[:, 0] = df.iloc[:, 0].fillna("null")
@@ -40,7 +31,6 @@ digit_indexes = contains_digits.index.values
 
 indexes_to_drop = list(range(10)) + list(range(48, 58))
 df.drop(indexes_to_drop, inplace=True)
-
 
 df = df.reset_index(drop=True)
 contains_digits = df[df.iloc[:, 0].astype(str).str.contains('\d+')]
@@ -87,14 +77,6 @@ df['Доп. ед. изм.'] = df['Доп. ед. изм.'].replace('–', 'шт')
 
 # Сохранение объединенного датафрейма в CSV
 df.to_csv("output_combined.csv", index=False, encoding='utf-8')
-
-
-# print(df)
-# print(digit_indexes)
-# print(df.iloc[48])
-# print (end_index)
-#print(df.iloc[10])
-#print(df.iloc[48])
 
 df.to_sql(name='table_name', con=engine, if_exists='replace', index=False)
 
